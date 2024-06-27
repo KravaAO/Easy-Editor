@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget,
     QFileDialog,
     QLabel, QPushButton, QListWidget,
-    QHBoxLayout, QVBoxLayout
+    QHBoxLayout, QVBoxLayout, QInputDialog
 )
 from PyQt5.QtCore import Qt  # потрібна константа Qt.KeepAspectRatio для зміни розмірів із збереженням пропорцій
 from PyQt5.QtGui import QPixmap  # оптимізована для показу на екрані картинка
@@ -15,6 +15,7 @@ app = QApplication([])
 win = QWidget()
 win.resize(700, 500)
 win.setWindowTitle('Easy Editor')
+lb_size = QLabel("Розміри: 0 x 0")  # Ініціалізація мітки з початковими значеннями
 lb_image = QLabel("Картинка")
 btn_dir = QPushButton("Папка")
 lw_files = QListWidget()
@@ -23,6 +24,8 @@ btn_left = QPushButton("Вліво")
 btn_right = QPushButton("Вправо")
 btn_flip = QPushButton("Відзеркалити")
 btn_sharp = QPushButton("Різкість")
+btn_crop = QPushButton("Обрізати")
+
 btn_bw = QPushButton("Ч/Б")
 
 row = QHBoxLayout()  # Головна лінія
@@ -31,12 +34,14 @@ col2 = QVBoxLayout()
 col1.addWidget(btn_dir)  # в першому - кнопка вибору каталогу
 col1.addWidget(lw_files)  # і список файлов
 col2.addWidget(lb_image, 95)  # в другому - картинка
+col2.addWidget(lb_size)  # Додавання мітки до другого стовпця інтерфейсу
 row_tools = QHBoxLayout()  # і ряд кнопок
 row_tools.addWidget(btn_left)
 row_tools.addWidget(btn_right)
 row_tools.addWidget(btn_flip)
 row_tools.addWidget(btn_sharp)
 row_tools.addWidget(btn_bw)
+row_tools.addWidget(btn_crop)  # для обрізання зображення
 col2.addLayout(row_tools)
 
 row.addLayout(col1, 20)
@@ -131,9 +136,21 @@ class ImageProcessor():
         lb_image.hide()
         pixmapimage = QPixmap(path)
         w, h = lb_image.width(), lb_image.height()
+        lb_size.setText(f"Розміри: {pixmapimage.width()} x {pixmapimage.height()}")  # Оновлення мітки розміру
         pixmapimage = pixmapimage.scaled(w, h, Qt.KeepAspectRatio)
         lb_image.setPixmap(pixmapimage)
         lb_image.show()
+
+    def do_crop(self):
+        ''' Запитує у користувача розміри та здійснює обрізку зображення '''
+        area = QInputDialog.getText(win, 'Обрізати зображення',
+                                    'Введіть координати області обрізання (x, y, ширина, висота):')
+        if area[1]:
+            x, y, w, h = map(int, area[0].split(','))
+            self.image = self.image.crop((x, y, x + w, y + h))
+            self.saveImage()
+            image_path = os.path.join(workdir, self.save_dir, self.filename)
+            self.showImage(image_path)
 
 
 def showChosenImage():
@@ -151,5 +168,6 @@ btn_left.clicked.connect(workimage.do_left)
 btn_right.clicked.connect(workimage.do_right)
 btn_sharp.clicked.connect(workimage.do_sharpen)
 btn_flip.clicked.connect(workimage.do_flip)
+btn_crop.clicked.connect(workimage.do_crop)
 
 app.exec()
