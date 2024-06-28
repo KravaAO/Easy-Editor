@@ -38,7 +38,7 @@ row_tools.addWidget(btn_right)
 row_tools.addWidget(btn_flip)
 row_tools.addWidget(btn_sharp)
 row_tools.addWidget(btn_bw)
-row_tools.addWidget(btn_res)
+row_tools.addWidget(btn_res) # додавання ресет кнопки в рядок кнопок
 col2.addLayout(row_tools)
 
 row.addLayout(col1, 20)
