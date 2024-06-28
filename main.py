@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt  # потрібна константа Qt.KeepAspectRatio для зміни розмірів із збереженням пропорцій
 from PyQt5.QtGui import QPixmap  # оптимізована для показу на екрані картинка
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 from PIL.ImageFilter import SHARPEN
 
 app = QApplication([])
@@ -24,6 +24,7 @@ btn_right = QPushButton("Вправо")
 btn_flip = QPushButton("Відзеркалити")
 btn_sharp = QPushButton("Різкість")
 btn_bw = QPushButton("Ч/Б")
+btn_brightness = QPushButton("Яскравість") # кнопка яскравості
 
 row = QHBoxLayout()  # Головна лінія
 col1 = QVBoxLayout()  # ділиться на два стовпці
@@ -37,6 +38,7 @@ row_tools.addWidget(btn_right)
 row_tools.addWidget(btn_flip)
 row_tools.addWidget(btn_sharp)
 row_tools.addWidget(btn_bw)
+row_tools.addWidget(btn_brightness) # додаємо кнопку яскравості в наш рядок кнопок
 col2.addLayout(row_tools)
 
 row.addLayout(col1, 20)
@@ -135,6 +137,14 @@ class ImageProcessor():
         lb_image.setPixmap(pixmapimage)
         lb_image.show()
 
+    def do_brightness(self):
+        enhancer = ImageEnhance.Brightness(self.image)
+        # Збільшуємо яскравість на 20% кожен раз, коли натискається кнопка
+        self.image = enhancer.enhance(1.2)
+        self.saveImage()
+        image_path = os.path.join(workdir, self.save_dir, self.filename)
+        self.showImage(image_path)
+
 
 def showChosenImage():
     if lw_files.currentRow() >= 0:
@@ -151,5 +161,6 @@ btn_left.clicked.connect(workimage.do_left)
 btn_right.clicked.connect(workimage.do_right)
 btn_sharp.clicked.connect(workimage.do_sharpen)
 btn_flip.clicked.connect(workimage.do_flip)
+btn_brightness.clicked.connect(workimage.do_brightness)
 
 app.exec()
